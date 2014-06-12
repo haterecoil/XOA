@@ -1,8 +1,5 @@
 // Version que j'ai modifiée dans la branche dev
-
 $(document).ready(function(){
-
-
 
 	var ttg = $('#textarea');
 	
@@ -36,30 +33,31 @@ $(document).ready(function(){
 	  }
 	});
 	
-	// ne marchera pas sur ton ordi, mais c'est juste pour que tu saches
-
-	// var socket = io.connect('http://127.0.0.1:8081');
-	var socket = io.connect('http://141.138.157.239:8081');
-
-	var pos = parseInt(prompt('Quel est votre position sur la rangée (de gauche à droite) ?',''));
 	
-	$('#pos span').text(pos);
 	
-	socket.emit('setPos',pos);
+	
+	
+	
+	
 
-	function gauche(msg)
-	{
-		socket.emit('send',{to: pos-1, msg: msg});
-	}
+	var socket = io.connect('http://127.0.0.1:8081');
+	// var socket = io.connect('http://141.138.157.239:8081');
 
-	function droite(msg)
-	{
-		socket.emit('send',{to: pos+1, msg: msg});
-	}
+	var x = parseInt(prompt('x?',''));
+	var y = parseInt(prompt('y?',''));
+	
+	$('#pos span').text(x+ ' '+y);
+	
+	socket.emit('setMyPos',{x: x, y: y});
 
-	socket.on('get',function(data) {
-		$('#receiver').text(data.msg);
-		if (pos>data.from)
+	function gauche(msg) { socket.emit('send',{to: pos-1, msg: msg}); }
+	function droite(msg) { socket.emit('send',{to: pos+1, msg: msg}); }
+	
+	
+
+	socket.on('message',function(data) {
+		$('#receiver').text(data.message);
+		if (relX<0)
 		{
 			$('#receiver').css('left','-500px').animate({left: 0}, 1000, 'easeOutCubic');
 		}
@@ -69,6 +67,13 @@ $(document).ready(function(){
 		}
 		// utiliser data.pos (la différence entre notre pos et celle de l'émetteur) pour savoir si ça vient de gauche ou droite
 		// @idée, si on passe de pos 4 à pos 6, le texte traverse l'écran de pos 5
+	});
+	
+	$('#send').click(function(){
+		var relX = parseInt(prompt('relX ?'));
+		var relY = parseInt(prompt('relY ?'));
+		
+		socket.emit('send',{relX: relX, relY: relY, message: $('textarea').val()});
 	});
 	
 	$('#gauche').click(function(){});
