@@ -1,0 +1,20 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body, html { height: 100%; }
+
+body { overflow-x: hidden; text-align: center; font-family: Tahoma; }
+
+div#left { width: 100px; position: fixed; left: 0; top: 0; bottom: 0; transition: 0.5s; }
+div#right {  width: 100px; position: fixed; right: 0; top: 0; bottom: 0; transition: 0.5s; }
+
+div#receiver { display: inline-block; height: 40%; margin-top: 20px; width: 80%; border: 1px black dashed; padding: 20px; position: relative; text-align: left; overflow: auto; }
+
+div#textarea { display: inline-block; width: 80%; margin-top: 20px; height: 500px; z-index: 10; }
+div#handle { background: #FFA; width: 100%; height: 10%; border: 1px solid black; border-bottom: 0; } 
+
+textarea { display: block; width: 100%; height: 40%; border: 1px solid black; border-top: 0; padding: 20px; }
+
+html body .ui-state-hover { background: rgba(100,100,100,0.2) !important; z-index: 90; }
+body .ui-state-default { /* background: yellow !important; */ }       
+
+p#pos { position: fixed; bottom: 5px; right: 5px; color: #BBB; }
+p#copyright { position: fixed; bottom: 5px; left: 5px; color: #BBB; }
