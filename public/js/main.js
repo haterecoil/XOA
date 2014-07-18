@@ -45,6 +45,8 @@ $(document).ready(function(){
        
         $('#pos span').text(x+ ' '+y);
        
+       // Emettre la position et le nom de l'utilisateur ( nom == provisoire)
+       // Users[x][y]{name, socketID, userID}
         socket.emit('setMyPos',{x: x, y: y});
         socket.emit('setUser', { 'newUser' : name });
 

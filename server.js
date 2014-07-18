@@ -34,18 +34,18 @@ router.route('/:roomName')
     .all(function(req, res, next){
         console.log("APP: checking roomName "+req.params.roomName);
         if ( req.params.roomName != "favicon.ico"){
-            console.log("Un utilisateur s'est connecté sur la room "+ req.params.roomName);
+            console.log("APP: Un utilisateur s'est connecté sur la room "+ req.params.roomName);
             db.connect();
             db.checkIfRoom(req.params.roomName);
             next();
         }
-        else console.log("checking favicon");
+        else console.log("APP: favicon.");
     })
     //affiche la room
     .get(function(req,res,next){
         console.log("APP: checked " +req.params.roomName);
         res.setHeader('Content-Type', 'text/plain');
-        res.end('Vous êtes sur la room '+ req.params.roomName);
+        res.end('APP: Vous êtes sur la room '+ req.params.roomName);
         //res.sendFile('index.html'); 
 
     });
@@ -72,11 +72,12 @@ io.sockets.on('connection', function(socket) {
         console.log(id);
         users[id] = {x: -999, y: -999, angle: 0}; // angle en magnétisme 45
         id2socket[id] = socket; // @todo transformer ça en BDD parce que ça va bientôt être galère je crois
-       
+       console.log("Socket has connected : ");
+       console.log(socket);
         socket.on('disconnect', function (pos)  { 
             users.splice(id, 1);
             id2socket.splice(id, 1);
-            console.log('disconnection');
+            console.log('USR: disconnection');
             console.log(users);
         });
        
@@ -84,13 +85,14 @@ io.sockets.on('connection', function(socket) {
 
         socket.on('setMyPos', function (pos)    { 
             users[id].x = pos.x; users[id].y = pos.y; 
-            console.log('setmypos');
+            console.log('USR: setmypos'+ pos);
             console.log(users); 
         });
 
-        socket.on('setUser', function (name) {
+        socket.on('setUser', function (name, x, y) {
+            db.setNewUser(name, x, y, socket);
+        }); 
 
-        }) 
        
        
         // @param data = { relX, relY, message }
@@ -101,14 +103,14 @@ io.sockets.on('connection', function(socket) {
                 var destX = users[id].x + data.relX;
                 var destY = users[id].y + data.relY;
                
-                console.log('dest ' + destX + ' ' + destY);
+                console.log('USR: dest ' + destX + ' ' + destY);
                
                 for (var i=0; i<users.length; i++) // @todo convert mongodb
                 {
                         console.log('i = ' + i + ' x ' + users[i].x + ' y ' + users[i].y);
                         if (users[i].x == destX && users[i].y == destY)
                         {
-                                console.log('target locked');
+                                console.log('USR: target locked');
                                 id2socket[i].emit('message',{from: id, relX: -data.relX, relY: -data.relY, message: data.message});
                                 break;
                         }
