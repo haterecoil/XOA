@@ -12,6 +12,34 @@ table ROOM (à voir : différencier room privée et room publique ou pas dans le
 - map des utilisateurs
 
 
+
+> GESTION PAR ROOMS.
+
+	Un utilisateur va sur xao.com/yolo
+
+		SI "yolo" n'existe pas , alors créer la room dans la base de donnée
+		SINON, récupérer les infos de la room : ID, Utilisateurs. 
+
+	L'utilisateur se place sur la minimap	
+
+		Enregistrement de l'utilisateur dans la BDD
+		Notification aux autres utilisateurs de la room que quelqu'un s'est installé. On envoie son nom, son ID, sa poxX et sa posY
+			< Sélectionner les ID des gens présents dans la room
+			< Envoyer la notif
+
+
+ENREGISTREMENT DES UTILISATEURS DANS LES ROOMS.
+
+
+
+
+Position X
+Position Y
+Nom de l'User
+ID de l'User
+
+
+
 Gérer les angles
 
 0 = N 		0
@@ -26,7 +54,8 @@ Gérer les angles
 
 0 = 1 =7
 
-
+> ça se fait en local
+> 
 
 
 0 N 0   HAUT = Y - 1  GAUCHE = X - 1 

@@ -1,0 +1,81 @@
+
+{
+    "menu": {
+        "id": "file",
+        "value": "File",
+        "popup": {
+            "menuitem": [
+                { "value": "New", "onclick": "CreateNewDoc()" },
+                { "value": "Open", "onclick": "OpenDoc()" },
+                { "value": "Close", "onclick": "CloseDoc()" }
+            ]
+        }
+    }
+}
+
+{
+    "user": {
+        "id": userID_fromClient,
+        "positionX": X_fromCLient,
+        "positionY": Y_fromClient
+    }
+}
+
+XML ?
+
+Il faut stocker ça...
+
+MAP UTILISATEURS
+
+> User se connecte, il envoie ses infos sous forme JSON ? Ou simple tableau... ? 
+Users[name[socketId][X][Y]] > Pop, push, etc. ?
+
+Users[x][y]{name, socket, userID}
+
+> Server reçoit le paquet User, il récupère la UsersMap et fait Users[x][y] = paquet. Puis renvoie la UsersMap à la BDD.
+
+> Machin envoie un message à X+1
+
+
+ ROOM NAME
+ USER     POSX     POSY       
+
+==========================================================================================
+========================      TODO LIST ==================================================
+==========================================================================================
+
+> Inviter les bonnes personnes à l'écriture de l'URL
+> Comptes utilisateurs
+	- nom
+	- prénom
+	- ID unique
+	- infos complémentaires
+		- localisation immédiate
+		- lieu d'étude / de travail
+	- personnes avec qui il a été en contact ( hashes ?)
+
+> 
+
+
+==========================================================================================
+========================      FACTEURS DE PROXIMITÉ ======================================
+==========================================================================================
+
+- X s'est déjà connecté avec Y
+- système de liens ("amis")
+- lieu géographique proche
+- adresse email ?             
+
+
+
+
+1 94 02 93 
+
+
+
+
+
+
+
+
+

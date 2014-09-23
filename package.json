@@ -1,0 +1,13 @@
+{
+  "name": "xoa-nodb",
+  "description": "lulz",
+  "version": "0.0.1",
+  "author": {
+    "name": "MC"
+  },
+  "dependencies": {
+    "express":"4.6.x",
+    "socket.io":"1.1.x",
+    "node-uuid":"1.4.x"
+  }
+}

@@ -45,15 +45,39 @@ $(document).ready(function(){
        
         $('#pos span').text(x+ ' '+y);
        
-        socket.emit('setMyPos',{x: x, y: y});
-        socket.emit('setUser', { 'newUser' : name });
+       // Emettre la position et le nom de l'utilisateur ( nom == provisoire)
+       // Users[x][y]{name, socketID, userID}
+        // socket.emit('setMyPos',{x: x, y: y});
+        // socket.emit('setUser', { 'newUser' : name });
 
         // @param data = { relX, relY, message }
         function gauche(msg) { socket.emit('send',{relX: -1, relY: 0, message: msg}); }
         function droite(msg) { socket.emit('send',{relX: 1, relY: 0, message: msg}); }
        
        
- 
+       $("#userLogin").click(function() {
+        socket.emit('userLogin', {'fullName' : "Morgan Caron"},function(data)
+          {
+            if (data.error) 
+              console.log('Something went wrong on the server');
+
+            if (data.ok)
+              console.log('Successfull user login');
+          });
+       })
+
+        $("#createMyRoom").click(function() {
+        socket.emit('createMyRoom', {}, function(data)
+          {
+            if (data.error) 
+              console.log('Something went wrong on the server');
+
+            if (data.ok)
+              console.log('room created');
+              // @todo : IMPORTANT  afficher la room
+          });
+       })
+        
         socket.on('message',function(data) {
         	console.log('message');
                 $('#receiver').text(data.message);
@@ -69,6 +93,10 @@ $(document).ready(function(){
                 // @idée, si on passe de pos 4 à pos 6, le texte traverse l'écran de pos 5
         });
        
+        socket.on('onlineUserList', function(data){
+          alert("onlineUserList");
+        });
+
         $('#send').click(function(){
                 var relX = parseInt(prompt('relX ?'));
                 var relY = parseInt(prompt('relY ?'));
