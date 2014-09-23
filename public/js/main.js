@@ -47,8 +47,13 @@ $(document).ready(function(){
        
        // Emettre la position et le nom de l'utilisateur ( nom == provisoire)
        // Users[x][y]{name, socketID, userID}
+<<<<<<< HEAD
         // socket.emit('setMyPos',{x: x, y: y});
         // socket.emit('setUser', { 'newUser' : name });
+=======
+        socket.emit('setMyPos',{x: x, y: y});
+        socket.emit('setUser', { 'newUser' : name });
+>>>>>>> FETCH_HEAD
 
         // @param data = { relX, relY, message }
         function gauche(msg) { socket.emit('send',{relX: -1, relY: 0, message: msg}); }

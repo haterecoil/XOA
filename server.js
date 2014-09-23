@@ -37,15 +37,27 @@ router.route('/:roomName')
         console.log("APP: checking roomName "+req.params.roomName);
         if ( req.params.roomName != "favicon.ico"){
             console.log("APP: Un utilisateur s'est connecté sur la room "+ req.params.roomName);
+<<<<<<< HEAD
+=======
+            db.connect();
+            db.checkIfRoom(req.params.roomName);
+            next();
+>>>>>>> FETCH_HEAD
         }
         else console.log("APP: favicon.");
     })
     //affiche la room
     .get(function(req,res,next){
         console.log("APP: checked " +req.params.roomName);
+<<<<<<< HEAD
         res.setHeader('Content-Type', 'text/html');
         //res.end('APP: Vous êtes sur la room '+ req.params.roomName);
         res.sendfile(__dirname+'/public/index.html'); 
+=======
+        res.setHeader('Content-Type', 'text/plain');
+        res.end('APP: Vous êtes sur la room '+ req.params.roomName);
+        //res.sendFile('index.html'); 
+>>>>>>> FETCH_HEAD
 
     });
 
@@ -62,6 +74,7 @@ var io = require('socket.io').listen(server);
 module.exports.io = io;
 
  
+<<<<<<< HEAD
 io.sockets.on('connection', function (socket) {
 
         // @todo : empêcher injections, et formater IP correctement anti collisions
@@ -160,6 +173,40 @@ io.sockets.on('connection', function (socket) {
         )
        }),
 
+=======
+var users = []; // tableau users. users[id] = { x:, y:, angle: } // 0 correspond à l'angle par rapport à l'axe vertical, orienté vers le haut
+var id2socket = []; // id2socket[id] = socket;
+ 
+io.sockets.on('connection', function(socket) {
+       
+        var id = users.length;
+        console.log(id);
+        users[id] = {x: -999, y: -999, angle: 0}; // angle en magnétisme 45
+        id2socket[id] = socket; // @todo transformer ça en BDD parce que ça va bientôt être galère je crois
+       console.log("Socket has connected : ");
+       console.log(socket);
+        socket.on('disconnect', function (pos)  { 
+            users.splice(id, 1);
+            id2socket.splice(id, 1);
+            console.log('USR: disconnection');
+            console.log(users);
+        });
+       
+        socket.on('getAllPos', function (pos)   { socket.emit('allPos',users); });
+
+        socket.on('setMyPos', function (pos)    { 
+            users[id].x = pos.x; users[id].y = pos.y; 
+            console.log('USR: setmypos'+ pos);
+            console.log(users); 
+        });
+
+        socket.on('setUser', function (name, x, y) {
+            db.setNewUser(name, x, y, socket);
+        }); 
+
+       
+       
+>>>>>>> FETCH_HEAD
         // @param data = { relX, relY, message }
         socket.on('send', function (data) {
                 console.log('send');
