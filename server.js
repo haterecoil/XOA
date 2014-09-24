@@ -37,27 +37,15 @@ router.route('/:roomName')
         console.log("APP: checking roomName "+req.params.roomName);
         if ( req.params.roomName != "favicon.ico"){
             console.log("APP: Un utilisateur s'est connecté sur la room "+ req.params.roomName);
-<<<<<<< HEAD
-=======
-            db.connect();
-            db.checkIfRoom(req.params.roomName);
-            next();
->>>>>>> FETCH_HEAD
         }
         else console.log("APP: favicon.");
     })
     //affiche la room
     .get(function(req,res,next){
         console.log("APP: checked " +req.params.roomName);
-<<<<<<< HEAD
         res.setHeader('Content-Type', 'text/html');
         //res.end('APP: Vous êtes sur la room '+ req.params.roomName);
         res.sendfile(__dirname+'/public/index.html'); 
-=======
-        res.setHeader('Content-Type', 'text/plain');
-        res.end('APP: Vous êtes sur la room '+ req.params.roomName);
-        //res.sendFile('index.html'); 
->>>>>>> FETCH_HEAD
 
     });
 
@@ -74,7 +62,6 @@ var io = require('socket.io').listen(server);
 module.exports.io = io;
 
  
-<<<<<<< HEAD
 io.sockets.on('connection', function (socket) {
 
         // @todo : empêcher injections, et formater IP correctement anti collisions
@@ -84,17 +71,16 @@ io.sockets.on('connection', function (socket) {
 */
 
 
-
-        socket.on('userLogin', function (data, clientCallback) {
+        //lorsque un client entre son nom et prénom, rentre son IP, son socket et son nom en DB
+        //émet une nouvelle liste lanUsers
+        socket.on('userLogin', function (data) {
 
             var userIp = socket.conn.remoteAddress;
             var userSocketId = socket.id;
             var userFullName = data.fullName;
 
-
-            //convertit l'IP en décimal
+            //convertit l'IP en décimal puis en string
             userIp = dot2num(userIp);
-
             var socketIOroom = userIp.toString();
             //join l'utilisateur à une room socket.io ayant son IP comme nom
             socket.join(socketIOroom);
@@ -102,136 +88,181 @@ io.sockets.on('connection', function (socket) {
             //ajoute l'utilisateur dans la DB, et envoie la liste des onlineUsers à tous ceux 
             //partageant la même IP que lui.
             // 
-            db.newOnlineUser(userIp, userSocketId, userFullName, emitOnlineUsers(userIp, socket));
-
-            clientCallback({ok:true});
-
+            db.newOnlineUser(userIp, userSocketId, userFullName, emitLanUsers(userIp, socket));
         }),
 
-        socket.on('createMyRoom', function (data, clientCallback){
-
+        //lorsque un client crée son salon    NE FONCITONNE PAS IMPORTANT
+        //INSERT en DB
+        //UPDATE OnlineUsers
+        //join le socket à la room correspondante
+        //déclenche le callback Client
+        socket.on('createMyRoom', function (data){
             //::::::  EASY WAY ::::::
-            db.executeInsertQuery("INSERT INTO Rooms (userMap) VALUES (NULL)",
+            db.executeInsertQuery("INSERT INTO Rooms VALUES (default, null)",
               function(result)
               {
-                console.log("room ID = " + result.insertId + " socket ID : "+ socket.id);
                 db.executeUpdateQuery("UPDATE OnlineUsers SET roomID = '"+result.insertId+"' WHERE socketID = '"+socket.id+"'",
                   function() 
                   {
-                    socket.join(uniqueRoomID);
-                    if (err) 
-                    {
-                      clientCallback({error:'NO_ACCESS_ROOM', msg:'could not join room'});
-                      return;
-                    }
-
-                    clientCallback({ok:true});
+                    socket.join(result.insertId);
+                    io.to(socket.id).emit("roomCreated");
                   } 
                 )
               }
             );
-
         }),
 
-        socket.on('joinTheRoom', function (data, clientCallback){
+        //lorsque un client rejoint un salon
+        //@param data obj userID
+        socket.on('joinTheRoom', function (data){
             //récupérer la room d'un utilisateur depuis son ID
             // @todo : IMPORTANT : ne pas faire confiance à l'userID procuré par le client...?
-            db.executeSelectQuery("SELECT RoomID FROM OnlineUsers WHERE UserID = "+data.userID+"",
-              function(results, clientCallback) 
+            db.executeSelectQuery("SELECT RoomID FROM OnlineUsers WHERE socketID = "+socket.id+"",
+              function(results) 
               {
                 var roomToJoin = results[0].userID;
                 socket.join(roomToJoin);
-                db.executeUpdateQuery("UPDATE OnlineUsers SET roomID = '"+roomToJoin+"'' WHERE userID = '"+data.userID+"'",
-                  function(clientCallback)
-                  {
-                    clientCallback({ok:true});
-                  }
+                db.executeUpdateQuery("UPDATE OnlineUsers SET roomID = '"+roomToJoin+"'' WHERE socketID = '"+socket.id+"'",
+                    io.to(socket.id).emit("roomJoined")
                 )
               }
             );
         }),
 
-
-       socket.on('updatePosition', function (data){
-        //reçoit la nouvelle position d'un utilisateur : X, Y et angle
-        //met à jour la DB
-        //
-        db.executeUpdateQuery("UPDATE OnlineUsers SET posX = "+data.posX+", posY = "+data.posY+", angle = "+data.angle+" WHERE socketID = '"+socket.id+"'",
-            function(socket)
-            {
-                //cherche la roomID en DB... changer ça ;____;
-                db.executeSelectQuery("SELECT roomID FROM OnlineUsers WHERE socketID ='"+socket.id+"'",
-                    function(socket, results)
-                    {
-
-                    }
+        //update OnlineUsers, enlève la roomID
+        //fais leave la room au socket
+        socket.on('leaveTheRoom', function (){
+            db.executeSelectQuery("SELECT RoomID FROM OnlineUsers WHERE socketID = "+socket.id+"",
+              function(results) 
+              {
+                var roomToLeave = results[0].userID;
+                socket.join(roomToLeave);
+                db.executeUpdateQuery("UPDATE OnlineUsers SET roomID = NULL WHERE socketID = '"+socket.id+"'",
+                    io.to(socket.id).emit("roomLeft")
                 )
-                io.to()
+              }
+            );
+        })
 
-                emit
-            }
+        //lorsque un client se positionne dans le salon
+        //@param data obj posX, posY, angle, roomId
+       socket.on('updatePosition', function (data){
+        db.executeUpdateQuery("UPDATE OnlineUsers SET posX = "+data.posX+", posY = "+data.posY+", angle = "+data.angle+" WHERE socketID = '"+socket.id+"'",
+            emitUserMap(socket, data.roomId)
         )
        }),
 
-=======
-var users = []; // tableau users. users[id] = { x:, y:, angle: } // 0 correspond à l'angle par rapport à l'axe vertical, orienté vers le haut
-var id2socket = []; // id2socket[id] = socket;
- 
-io.sockets.on('connection', function(socket) {
-       
-        var id = users.length;
-        console.log(id);
-        users[id] = {x: -999, y: -999, angle: 0}; // angle en magnétisme 45
-        id2socket[id] = socket; // @todo transformer ça en BDD parce que ça va bientôt être galère je crois
-       console.log("Socket has connected : ");
-       console.log(socket);
-        socket.on('disconnect', function (pos)  { 
-            users.splice(id, 1);
-            id2socket.splice(id, 1);
-            console.log('USR: disconnection');
-            console.log(users);
-        });
-       
-        socket.on('getAllPos', function (pos)   { socket.emit('allPos',users); });
-
-        socket.on('setMyPos', function (pos)    { 
-            users[id].x = pos.x; users[id].y = pos.y; 
-            console.log('USR: setmypos'+ pos);
-            console.log(users); 
-        });
-
-        socket.on('setUser', function (name, x, y) {
-            db.setNewUser(name, x, y, socket);
-        }); 
-
-       
-       
->>>>>>> FETCH_HEAD
-        // @param data = { relX, relY, message }
+        //@param data = { relX, relY, message }
+        //les coordonnées sont +1, 0 ou -1
         socket.on('send', function (data) {
-                console.log('send');
-                console.log(users);
-
-                var destX = users[id].x + data.relX;
-                var destY = users[id].y + data.relY;
-               
-                console.log('USR: dest ' + destX + ' ' + destY);
-               
-                for (var i=0; i<users.length; i++) // @todo convert db
+            //récupère la position
+            db.executeSelectQuery("SELECT posX, posY FROM OnlineUsers WHERE socketID = '"+socket.id+"'",
+                function(results)
                 {
-                        console.log('i = ' + i + ' x ' + users[i].x + ' y ' + users[i].y);
-                        if (users[i].x == destX && users[i].y == destY)
-                        {
-                                console.log('USR: target locked');
-                                id2socket[i].emit('message',{from: id, relX: -data.relX, relY: -data.relY, message: data.message});
-                                break;
-                        }
+                    var destX = results.posX + data.posX;
+                    var destY = results.posY + data.posY;
+
+                    db.executeSelectQuery("SELECT socketID FROM OnlineUsers WHERE posX = "+destX+" AND posY = "+destY+"", function(results){
+                        var destinataire = results[0].socketID;
+                        io.to(destinataire).emit("message", data.message);
+                    })
                 }
-               
-                // if (users[data.to])
-                // users[data.to].emit('get',{from: socket.pos, msg: data.msg});
+            )
+            //select l'user correspondant
         });
 });
+
+//convertir des IP à points en décimal
+// format "AAA.BBB.CCC.DDD" vers "XXXXXXXXXXX"
+function dot2num(dot) 
+{
+    var d = dot.split('.');
+    return ((((((+d[0])*256)+(+d[1]))*256)+(+d[2]))*256)+(+d[3]);
+}
+function num2dot(num) 
+{
+    var d = num%256;
+    for (var i = 3; i > 0; i--) 
+    { 
+        num = Math.floor(num/256);
+        d = num%256 + '.' + d;
+    }
+    return d;
+}
+
+// Emet la liste des personens en LAN avec le client qui se connecte
+//@params IP int l'IP du client
+//@params socket object qui contient le socket du client initiant la fonciton
+//@return lanList object la liste des lan Users formatée.
+function emitLanUsers(IP, socket) {
+    db.connect();
+    db.mySqlClient.getConnection(function(err, connection){
+      connection.query("SELECT * FROM OnlineUsers WHERE IP = '"+IP+"' ORDER BY roomID DESC",
+      function(err, results){
+        if (err) throw err;
+
+        console.log("> get lan users ");
+
+        //trier les users sans groupes et les users avec groupe.
+
+        var dernierGroupe = [];
+        var dernierGroupeId = -1;
+        var lanList = [];
+
+        for ( var i = 0; i < results.length; i++)
+        {
+            if ( results[i].roomID == null) 
+            {
+                lanList.push({type: "user", uid: results[i].userID, fullName: results[i].fullName, hasRoom: false});
+            }
+            else
+            {
+
+                if ( results[i].roomID == dernierGroupeId) {
+                    dernierGroupe.push({type: "user", uid: results[i].userID, fullName: results[i].fullName, hasRoom: true});
+                }
+                else 
+                {
+                    if ( dernierGroupeId != -1 )
+                        lanList.push({ type: "group", roomID: results[i].roomID, users: JSON.parse(JSON.stringify(dernierGroupe)) });
+                }
+                dernierGroupeId = results[i].roomID;
+            }
+        }
+
+        //change l'IP en string et envoie à la room correspondante le message.
+        var socketIOroom = IP.toString();
+        io.to(socketIOroom).emit("lanUsersList", lanList)
+        connection.release();
+      })
+    })
+}
+
+//émet la userMap à une room
+//@params socket obj le socket du client
+//@params roomId int la roomID
+function emitUserMap(socket, roomId){
+    db.connect();
+    db.mySqlClient.getConnection(function(err, connection){
+      connection.query("SELECT userID, posX, posY, angle FROM OnlineUsers WHERE roomID = '"+roomId+"'",
+      function(err, results){
+        if (err) throw err;
+
+        console.log("> emit user map to room  "+ roomId);
+
+        var socketIOroom = roomId;
+        io.to(socketIOroom).emit("fullUserMap", results);
+        connection.release();
+      })
+    })
+}
+
+
+
+
+
+server.listen(8081);
+
 
 /*
 
@@ -269,63 +300,6 @@ io.sockets.on('connection', function(socket) {
             supprime la room roomID
 
 */
-
-
-//convertir des IP à points en décimal
-// format "AAA.BBB.CCC.DDD" vers "XXXXXXXXXXX"
-function dot2num(dot) 
-{
-    var d = dot.split('.');
-    return ((((((+d[0])*256)+(+d[1]))*256)+(+d[2]))*256)+(+d[3]);
-}
-function num2dot(num) 
-{
-    var d = num%256;
-    for (var i = 3; i > 0; i--) 
-    { 
-        num = Math.floor(num/256);
-        d = num%256 + '.' + d;
-    }
-    return d;
-}
-
-// IMPORTANT : manage socket.io rooms
-function emitOnlineUsers(IP, socket) {
-    db.connect();
-    db.mySqlClient.getConnection(function(err, connection){
-      connection.query("SELECT * FROM OnlineUsers WHERE IP = '"+IP+"'",
-      function(err, results){
-        if (err) throw err;
-
-        console.log("> get online users callback");
-
-        //change l'IP en string et envoie à la room correspondante le message.
-        var socketIOroom = IP.toString();
-        io.to(socketIOroom).emit("onlineUserList", {list : results})
-        connection.release();
-      })
-    })
-}
-
-function emitToRoom(socket, event, data) {
-    db.connect();
-    db.mySqlClient.getConnection(function(err, connection){
-      connection.query("SELECT roomID FROM OnlineUsers WHERE socketID = '"+socket.id+"'",
-      function(err, results){
-        if (err) throw err;
-
-        console.log("> emit to users in room "+ results.roomID);
-
-        //change l'IP en string et envoie à la room correspondante le message.
-        var socketIOroom = results.roomID;
-        io.to(socketIOroom).emit("newPosition", {list : results})
-        connection.release();
-      })
-    })
-}
- 
-server.listen(8081);
-
 
 
 

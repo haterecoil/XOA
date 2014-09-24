@@ -47,13 +47,8 @@ $(document).ready(function(){
        
        // Emettre la position et le nom de l'utilisateur ( nom == provisoire)
        // Users[x][y]{name, socketID, userID}
-<<<<<<< HEAD
         // socket.emit('setMyPos',{x: x, y: y});
         // socket.emit('setUser', { 'newUser' : name });
-=======
-        socket.emit('setMyPos',{x: x, y: y});
-        socket.emit('setUser', { 'newUser' : name });
->>>>>>> FETCH_HEAD
 
         // @param data = { relX, relY, message }
         function gauche(msg) { socket.emit('send',{relX: -1, relY: 0, message: msg}); }
@@ -61,26 +56,11 @@ $(document).ready(function(){
        
        
        $("#userLogin").click(function() {
-        socket.emit('userLogin', {'fullName' : "Morgan Caron"},function(data)
-          {
-            if (data.error) 
-              console.log('Something went wrong on the server');
-
-            if (data.ok)
-              console.log('Successfull user login');
-          });
+        socket.emit('userLogin', {'fullName' : "Morgan Caron"});
        })
 
-        $("#createMyRoom").click(function() {
-        socket.emit('createMyRoom', {}, function(data)
-          {
-            if (data.error) 
-              console.log('Something went wrong on the server');
-
-            if (data.ok)
-              console.log('room created');
-              // @todo : IMPORTANT  afficher la room
-          });
+       $("#createMyRoom").click(function() {
+        socket.emit('createMyRoom', {});
        })
         
         socket.on('message',function(data) {
@@ -98,8 +78,20 @@ $(document).ready(function(){
                 // @idée, si on passe de pos 4 à pos 6, le texte traverse l'écran de pos 5
         });
        
-        socket.on('onlineUserList', function(data){
-          alert("onlineUserList");
+        socket.on('lanUsersList', function(data){
+          console.log("lan users list")
+        });
+        socket.on("fullUserMap", function(data){
+          console.log("full user map")
+        });
+        socket.on("roomCreated", function(data){
+          console.log("room created")
+        });
+        socket.on("roomJoined", function(data){
+          console.log("room joined")
+        });
+        socket.on("roomLeft", function(){
+
         });
 
         $('#send').click(function(){

@@ -1,92 +1,14 @@
-table USER
-- userid
-- prenom
-- nom
-- SALLE DANS LAQUELLE IL EST / ROOM VIRTUELLE DANS LAQUELLE IL EST
+TABLES
 
-
-
-table ROOM (à voir : différencier room privée et room publique ou pas dans les tables ?)
-- roomid
-- nomroom (si publique)
-- map des utilisateurs
-
-
-
-> GESTION PAR ROOMS.
-
-	Un utilisateur va sur xao.com/yolo
-
-		SI "yolo" n'existe pas , alors créer la room dans la base de donnée
-		SINON, récupérer les infos de la room : ID, Utilisateurs. 
-
-	L'utilisateur se place sur la minimap	
-
-		Enregistrement de l'utilisateur dans la BDD
-		Notification aux autres utilisateurs de la room que quelqu'un s'est installé. On envoie son nom, son ID, sa poxX et sa posY
-			< Sélectionner les ID des gens présents dans la room
-			< Envoyer la notif
-
-
-ENREGISTREMENT DES UTILISATEURS DANS LES ROOMS.
-
-
-
-
-Position X
-Position Y
-Nom de l'User
-ID de l'User
-
-
-
-Gérer les angles
-
-0 = N 		0
-45			1
-90 = E 		2
-135 		3
-180 = S 	4
-225 		5
-270 = O 	6
-315			7
-
-
-0 = 1 =7
-
-> ça se fait en local
-> 
-
-
-0 N 0   HAUT = Y - 1  GAUCHE = X - 1 
-O 0 O   BAS  = Y + 1  DROITE = X + 1
-0 S 0
-
-O 0 N   HAUT = Y-1 X+1  GAUCHE = Y-1 X-1 
-0 1 0	BAS  = Y+1 X-1  DROITE = Y+1 X+1
-S 0 E
-
-0 E 0
-S 2 N
-0 O 0
-
-0 0 0
-0 3 0
-0 0 N 
-
-0 0 0
-0 4 0
-0 N 0
-
-0 0 0
-0 5 0
-N 0 0
-
-0 0 0
-N 6 0
-0 0 0
-
-N 0 0
-0 7 0
-0 0 0
-
+OnlineUsers
+	userID
+	IP
+	socketID
+	roomID
+	fullName
+	posX
+	posY
+	angle
+Rooms
+	roomID
+	userMap    (useless ? )
